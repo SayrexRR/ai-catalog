@@ -1,0 +1,47 @@
+{
+  "Navigation": {
+    "agents": "Agents",
+    "portfolio": "Portfolio",
+    "admin": "Admin"
+  },
+  "Hero": {
+    "title": "Automate Your Workflow with AI Agents",
+    "subtitle": "Discover ready-to-use AI solutions that reduce costs, eliminate routine, and scale your business 24/7.",
+    "ctaCatalog": "View Catalog",
+    "ctaContact": "Request Custom AI"
+  },
+  "Benefits": {
+    "title": "Why Your Business Needs AI Agents",
+    "roiTitle": "High ROI & Cost Reduction",
+    "roiDesc": "Cut operational costs by up to 60% by automating repetitive tasks and reallocating human resources to strategic goals.",
+    "timeTitle": "24/7 Tireless Operation",
+    "timeDesc": "AI agents don't sleep or take vacations. They handle customer requests, data processing, and monitoring around the clock.",
+    "qualityTitle": "Zero Human Error",
+    "qualityDesc": "Ensure absolute precision in data entry, analytics, and reporting by eliminating fatigue-driven mistakes.",
+    "scaleTitle": "Infinite Scalability",
+    "scaleDesc": "Easily handle traffic spikes and increased workloads without the need to immediately hire and train new staff."
+  },
+  "Footer": {
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "Catalog": {
+    "searchPlaceholder": "Search agents...",
+    "noDescription": "No description provided.",
+    "viewDetails": "View Details",
+    "noAgentsFound": "No active agents found matching your search.",
+    "orderNow": "Order Now" 
+  },
+  "LeadForm": {
+    "title": "Order AI Solution",
+    "description": "Fill out the form, and we will contact you to discuss the details.",
+    "name": "Your Name",
+    "contact": "Email or Telegram",
+    "message": "Comment (optional)",
+    "submit": "Send Request",
+    "sending": "Sending...",
+    "success": "Request sent successfully! We will contact you soon.",
+    "error": "Something went wrong. Please try again."
+  }
+}
