@@ -14,7 +14,7 @@ export function Footer() {
         <div className="flex flex-col items-center md:items-start gap-2">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-lg tracking-tight">
-              AI<span className="text-primary">Agents</span>
+              AI<span className="text-primary"> Agents</span>
             </span>
           </Link>
           <p className="text-sm text-muted-foreground">

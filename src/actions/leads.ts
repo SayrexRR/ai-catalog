@@ -79,7 +79,7 @@ export async function submitLead(formData: LeadData) {
         // Зміни email відправника на той, що підтверджений у твоєму акаунті Resend
         from: 'AI Catalog <onboarding@resend.dev>', 
         // Зміни email отримувача на свій
-        to: 'your-email@example.com', 
+        to: 'rr.sayrex@gmail.com', 
         subject: `New Lead: ${formData.client_name}`,
         html: `
           <h2>New Lead from AI Catalog</h2>
@@ -103,4 +103,24 @@ export async function submitLead(formData: LeadData) {
     console.error('Server Action Error:', error);
     return { success: false, error: 'Internal server error' };
   }
+}
+
+export async function updateLeadStatus(id: number, newStatus: string) {
+  // Використовуємо admin клієнт, оскільки це захищена операція
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { error } = await supabaseAdmin
+    .from('leads')
+    .update({ status: newStatus })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating lead:', error);
+    return { success: false, error: 'Помилка при оновленні статусу' };
+  }
+
+  return { success: true };
 }

@@ -33,14 +33,7 @@ export function Header() {
         <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
           <LangSwitcher />
           <ThemeToggle />
-          
-          <Link href="/admin">
-             <span className="text-xs text-muted-foreground hover:underline hidden md:inline-block">
-               {t('admin')}
-             </span>
-          </Link>
         </div>
-
       </div>
     </header>
   );
