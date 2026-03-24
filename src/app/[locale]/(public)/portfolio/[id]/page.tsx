@@ -1,21 +1,14 @@
-import { createClient } from '@/lib/supabase/server';
-import { getTranslations, getLocale } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Maximize2 } from 'lucide-react';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { createClient } from "@/lib/supabase/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import { Link } from "@/i18n/routing";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { PortfolioGallery } from "@/components/ui/portfolio-gallery";
 
-export const revalidate = 60; // ISR кешування
+export const revalidate = 60;
 
 export default async function PortfolioDetailPage({
   params,
@@ -24,46 +17,66 @@ export default async function PortfolioDetailPage({
 }) {
   const resolvedParams = await params;
   const projectId = resolvedParams.id;
-  const t = await getTranslations('Catalog');
-  const locale = (await getLocale()) as 'en' | 'ru';
+  const t = await getTranslations("Catalog");
+  const locale = (await getLocale()) as "en" | "ru";
   const supabase = await createClient();
 
   const { data: project, error } = await supabase
-    .from('portfolio')
-    .select('*')
-    .eq('id', projectId)
-    .eq('status', 'active')
+    .from("portfolio")
+    .select("*")
+    .eq("id", projectId)
+    .eq("status", "active")
     .single();
 
   if (error || !project) {
     notFound();
   }
 
-  const localizedTitle = typeof project.title === 'object' ? project.title[locale] : project.title;
-  const localizedDesc = typeof project.description_html === 'object' ? project.description_html[locale] : project.description_html;
+  const localizedTitle =
+    typeof project.title === "object" ? project.title[locale] : project.title;
+  let localizedDesc =
+    typeof project.description_html === "object"
+      ? project.description_html[locale]
+      : project.description_html;
+
+  // Автоматично лікуємо текст від нерозривних пробілів перед виводом
+  if (localizedDesc) {
+    localizedDesc = localizedDesc.replaceAll("&nbsp;", " ");
+  }
   const techStack = project.tech_stack || [];
-  const gallery = project.gallery || []; // Тільки додаткові фото для каруселі
+  const gallery = project.gallery || [];
 
   return (
-    <div className="container py-12 md:py-16 mx-auto px-4 max-w-4xl">
-      
+    <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16 max-w-4xl">
       {/* Кнопка "Назад" */}
-      <Button variant="ghost" asChild className="mb-6 -ml-4 hover:bg-transparent text-muted-foreground hover:text-foreground">
-        <Link href="/portfolio" className="flex items-center gap-2 transition-colors">
+      <Button
+        variant="ghost"
+        asChild
+        className="mb-6 -ml-2 sm:-ml-4 hover:bg-transparent text-muted-foreground hover:text-foreground"
+      >
+        <Link
+          href="/portfolio"
+          className="flex items-center gap-2 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
-          {t('backToPortfolio')}
+          {t("backToPortfolio")}
         </Link>
       </Button>
 
-      {/* Заголовок та Стек технологій */}
-      <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
+      {/* Заголовок та Стек */}
+      <div className="mb-8 md:mb-10">
+        {/* text-balance робить так, щоб багаторядкові заголовки виглядали симетрично */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-balance">
           {localizedTitle}
         </h1>
         {techStack.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {techStack.map((tech: string, i: number) => (
-              <Badge key={i} variant="secondary" className="text-sm px-3 py-1">
+              <Badge
+                key={i}
+                variant="secondary"
+                className="text-xs sm:text-sm px-2.5 py-0.5"
+              >
                 {tech}
               </Badge>
             ))}
@@ -71,12 +84,12 @@ export default async function PortfolioDetailPage({
         )}
       </div>
 
-      {/* Головна обкладинка (Окремо, велика) */}
+      {/* Головна обкладинка */}
       {project.cover_image && (
-        <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-12 shadow-lg border bg-muted">
+        <div className="relative aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden mb-10 md:mb-14 shadow-md border bg-muted">
           <Image
             src={project.cover_image}
-            alt={localizedTitle || 'Cover'}
+            alt={localizedTitle || "Cover"}
             fill
             className="object-cover"
             priority
@@ -84,65 +97,20 @@ export default async function PortfolioDetailPage({
         </div>
       )}
 
-      {/* Карусель Галереї (Тільки якщо є додаткові фото) */}
+      {/* Карусель Галереї */}
       {gallery.length > 0 && (
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold tracking-tight">
-              {t('galleryTitle')}
-            </h3>
-          </div>
-          
-          <Carousel className="w-full relative group">
-            <CarouselContent className="-ml-4">
-              {gallery.map((imgUrl: string, idx: number) => (
-                // basis-full на мобільному (1 фото), md:basis-1/2 на комп'ютері (2 фото поруч)
-                <CarouselItem key={idx} className="pl-4 md:basis-1/2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="relative aspect-video rounded-xl overflow-hidden border shadow-sm group/slide bg-muted cursor-pointer">
-                        <Image
-                          src={imgUrl}
-                          alt={`Gallery image ${idx + 1}`}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover/slide:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/slide:opacity-100 transition-opacity flex items-center justify-center">
-                          <Maximize2 className="w-8 h-8 text-white p-1.5 bg-black/50 rounded-full" />
-                        </div>
-                      </div>
-                    </DialogTrigger>
-                    
-                    <DialogContent className="max-w-[95vw] max-h-[90vh] p-1 bg-transparent border-none overflow-hidden">
-                      <div className="relative w-full h-[85vh]">
-                        <Image
-                          src={imgUrl}
-                          alt={`Fullscreen gallery image ${idx + 1}`}
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            
-            {gallery.length > 2 && (
-              <>
-                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0" />
-                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0" />
-              </>
-            )}
-          </Carousel>
-        </div>
+        <PortfolioGallery gallery={gallery} title={t("galleryTitle")} />
       )}
 
-      {/* Текст опису (Знизу) */}
+      {/* Опис проєкту з ідеальною адаптивністю */}
       {localizedDesc && (
-        <div className="pt-8 border-t">
+        <div className="pt-8 md:pt-10 border-t border-border/50">
           <div
-            className="prose prose-lg dark:prose-invert max-w-none"
+            className="prose prose-sm sm:prose-base md:prose-lg dark:prose-invert max-w-none 
+                       prose-headings:text-balance prose-a:text-primary 
+                       prose-img:rounded-xl sm:prose-img:rounded-2xl prose-img:shadow-sm 
+                       prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:overflow-x-auto
+                       whitespace-normal wrap-break-word"
             dangerouslySetInnerHTML={{ __html: localizedDesc }}
           />
         </div>

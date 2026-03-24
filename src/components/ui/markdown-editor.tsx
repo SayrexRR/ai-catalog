@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
-import dynamic from 'next/dynamic';
-import 'react-quill-new/dist/quill.snow.css'; 
-
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+import { useEffect, useState } from "react";
+import "@blocknote/core/fonts/inter.css";
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/mantine";
+import "@blocknote/mantine/style.css";
 
 interface RichTextEditorProps {
   value: string;
@@ -11,28 +12,45 @@ interface RichTextEditorProps {
 }
 
 export function MarkdownEditor({ value, onChange }: RichTextEditorProps) {
-  // Розширена панель інструментів (майже як у Word)
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }], // Заголовки H1, H2, H3
-      [{ 'size': ['small', false, 'large', 'huge'] }], // Розмір тексту
-      ['bold', 'italic', 'underline', 'strike'], // Форматування
-      [{ 'color': [] }, { 'background': [] }], // Колір тексту та фону
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }], // Списки
-      [{ 'align': [] }], // Вирівнювання (по центру, справа, зліва)
-      ['link', 'clean'] // Посилання та очищення стилів
-    ]
-  };
+  const [isReady, setIsReady] = useState(false);
+
+  // Ініціалізуємо сучасний редактор
+  const editor = useCreateBlockNote();
+
+  // Завантажуємо старий HTML з бази і перетворюємо його на блоки (як у Notion)
+  useEffect(() => {
+    async function loadInitialHTML() {
+      if (value) {
+        // Парсимо HTML у структуру BlockNote
+        const blocks = await editor.tryParseHTMLToBlocks(value);
+        editor.replaceBlocks(editor.document, blocks);
+      }
+      setIsReady(true);
+    }
+    
+    if (!isReady) {
+      loadInitialHTML();
+    }
+  }, [editor, value, isReady]);
 
   return (
-    // Додаємо клас [&_.ql-editor]:min-h-[400px], щоб мінімальна висота поля для вводу була 400px
-    <div className="rounded-md overflow-hidden border bg-white text-black [&_.ql-editor]:min-h-100 [&_.ql-editor]:text-base">
-      <ReactQuill 
-        theme="snow" 
-        value={value} 
-        onChange={onChange} 
-        modules={modules} 
-      />
+    // Фіксуємо мінімальну висоту, щоб було зручно писати
+    <div className="border rounded-md bg-white min-h-125 py-4 cursor-text text-black">
+      {!isReady ? (
+        <div className="p-4 text-muted-foreground animate-pulse">
+          Завантаження редактора...
+        </div>
+      ) : (
+        <BlockNoteView
+          editor={editor}
+          theme="light"
+          onChange={async () => {
+            // Коли ти щось друкуєш, ми конвертуємо блоки назад у чистий HTML для нашої бази
+            const html = await editor.blocksToHTMLLossy(editor.document);
+            onChange(html);
+          }}
+        />
+      )}
     </div>
   );
 }

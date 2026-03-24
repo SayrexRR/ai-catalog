@@ -125,3 +125,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+.ql-toolbar.ql-snow {
+  position: sticky !important;
+  top: 0; /* Якщо в тебе є верхнє меню в адмінці, зміни на top: 64px; або більше */
+  z-index: 40;
+  background-color: hsl(var(--background));
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  /* Додаємо легку тінь, щоб панель виділялася при скролі тексту під нею */
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); 
+}
