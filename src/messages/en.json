@@ -2,7 +2,8 @@
   "Navigation": {
     "agents": "Agents",
     "portfolio": "Portfolio",
-    "admin": "Admin"
+    "admin": "Admin",
+    "contact": "Get in touch"
   },
   "Hero": {
     "title": "Automate Your Workflow with AI Agents",
